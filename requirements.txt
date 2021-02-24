@@ -3,3 +3,4 @@ numpy~=1.18.1
 tqdm~=4.32.1
 setuptools~=46.0.0
 yfinance~=0.1.55
+gin-config~=0.4.0

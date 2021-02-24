@@ -1,3 +1,4 @@
+import gin
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -8,7 +9,7 @@ from torch.nn import init
     v_embedding: Embedding for neighbor vectors.
 """
 
-
+@gin.configurable
 class SkipGramContinuousModel(nn.Module):
     def __init__(self, emb_size, emb_dimension):
         super(SkipGramContinuousModel, self).__init__()
