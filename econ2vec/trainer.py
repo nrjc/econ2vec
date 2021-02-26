@@ -7,7 +7,7 @@ from torch import optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from econ2vec.dataset import Econ2VecDataset
+from econ2vec.data_grabber import YahooFinanceETL
 from econ2vec.model import SkipGramContinuousModel
 
 
@@ -19,12 +19,12 @@ class Word2VecTrainer:
     initial_lr: float = 1e-3
     use_cuda: bool = torch.cuda.is_available()
     device: Any = None
-    dataset: Econ2VecDataset = None
+    dataset: YahooFinanceETL = None
     skip_gram_model: SkipGramContinuousModel = None
     dataloader: DataLoader = None
 
     def __post_init__(self):
-        self.dataset = Econ2VecDataset()
+        self.dataset = YahooFinanceETL()
         self.dataloader = DataLoader(self.dataset, batch_size=self.batch_size,
                                      shuffle=False, num_workers=0, collate_fn=self.dataset.collate)
         self.skip_gram_model = SkipGramContinuousModel()
@@ -53,5 +53,3 @@ class Word2VecTrainer:
                     running_loss = running_loss * 0.9 + loss.item() * 0.1
                     if i > 0 and i % 500 == 0:
                         print(" Loss: " + str(running_loss))
-
-            self.skip_gram_model.save_embedding(self.data.id2word, self.output_file_name)

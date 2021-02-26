@@ -50,6 +50,21 @@ class YahooFinanceETL(Dataset):
         self.inital_embedding_size = len(self.tickers)
         self.data_length = len(df_final)
 
+    def __len__(self):
+        return self.data_length
+
+    def derive_relevant_indices(self, idx) -> List[int]:
+        unfiltered_range = range(idx - self.neighborhood_size, idx + self.neighborhood_size + 1)
+
+        def mirror(i):
+            if i > self.data_length-1:
+                return 2 * self.data_length - i-1
+            if i < 0:
+                return -i
+            return i
+
+        return list(map(mirror, filter(lambda x: x != idx, unfiltered_range)))
+
     def __getitem__(self, index) -> T_co:
         """
         Returns two tensors [u_embedding, v_embedding]. U is a numpy array of [1, initial_embedding_size],
@@ -57,17 +72,16 @@ class YahooFinanceETL(Dataset):
         :param index:
         :return:
         """
-        u_embedding = self.dataset.iloc[index, :].to_numpy()
-        v_indexes = [abs(i) for i in range(index - self.neighborhood_size, index + self.neighborhood_size) if
-                     i != index]
-        v_embedding = self.dataset.iloc[v_indexes, :].to_numpy()
+        u_embedding = self.dataset.iloc[index, :].to_numpy().reshape(1, -1)
+        v_embedding = self.dataset.iloc[self.derive_relevant_indices(index), :].to_numpy()
         return u_embedding, v_embedding
 
     @staticmethod
     def collate(batches):
-        all_u = [u for batch in batches for u, _ in batch if len(batch) > 0]
-        all_v = [v for batch in batches for _, v in batch if len(batch) > 0]
+        all_u = [u for u, _ in batches if len(batches) > 0]
+        all_v = [v for _, v in batches if len(batches) > 0]
         return torch.FloatTensor(all_u), torch.FloatTensor(all_v)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
