@@ -18,6 +18,7 @@ class Word2VecTrainer:
     iterations: int
     initial_lr: float = 1e-3
     use_cuda: bool = torch.cuda.is_available()
+    verbose: bool = False
     device: Any = None
     dataset: YahooFinanceETL = None
     skip_gram_model: SkipGramContinuousModel = None
@@ -34,12 +35,13 @@ class Word2VecTrainer:
 
     def train(self):
         for iteration in range(self.iterations):
-            print("\n\n\nIteration: " + str(iteration + 1))
+            print("Iteration: " + str(iteration + 1))
             optimizer = optim.Adam(self.skip_gram_model.parameters(), lr=self.initial_lr)
             scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, len(self.dataloader))
 
             running_loss = 0.0
-            for i, sample_batched in enumerate(tqdm(self.dataloader)):
+
+            for i, sample_batched in enumerate(tqdm(self.dataloader, disable=not self.verbose)):
                 if len(sample_batched[0]) > 1:
                     pos_u = sample_batched[0].to(self.device)
                     neg_v = sample_batched[1].to(self.device)
