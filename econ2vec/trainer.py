@@ -17,12 +17,13 @@ class Word2VecTrainer:
     batch_size: int
     iterations: int
     initial_lr: float = 1e-3
-    use_cuda: bool = torch.cuda.is_available()
     verbose: bool = False
+    use_cuda: bool = torch.cuda.is_available()
     device: Any = None
     dataset: YahooFinanceETL = None
     skip_gram_model: SkipGramContinuousModel = None
     dataloader: DataLoader = None
+    output_filename: str = "out.vec"
 
     def __post_init__(self):
         self.dataset = YahooFinanceETL()
@@ -55,3 +56,5 @@ class Word2VecTrainer:
                     running_loss = running_loss * 0.9 + loss.item() * 0.1
                     if i > 0 and i % 500 == 0:
                         print(" Loss: " + str(running_loss))
+
+        self.skip_gram_model.save_embedding(self.dataset.id2ts, self.output_filename)

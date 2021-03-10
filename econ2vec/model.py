@@ -30,10 +30,10 @@ class SkipGramContinuousModel(nn.Module):
         score = -F.logsigmoid(score)
         return torch.mean(score)
 
-    def save_embedding(self, id2word, file_name):
+    def save_embedding(self, id2ts, file_name):
         embedding = self.u_embeddings.weight.cpu().data.numpy()
         with open(file_name, 'w') as f:
-            f.write('%d %d\n' % (len(id2word), self.emb_dimension))
-            for wid, w in id2word.items():
-                e = ' '.join(map(lambda x: str(x), embedding[wid]))
-                f.write('%s %s\n' % (w, e))
+            f.write(f'{len(id2ts)} {self.emb_dimension}\n')
+            for id, ts in id2ts.items():
+                e = ' '.join(map(lambda x: str(x), embedding[:id]))
+                f.write(f'{ts} {e}\n')

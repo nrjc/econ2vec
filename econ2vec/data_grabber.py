@@ -49,6 +49,9 @@ class YahooFinanceETL(Dataset):
         self.dataset = df_final
         self.inital_embedding_size = len(self.tickers)
         self.data_length = len(df_final)
+        self.id2ts = dict()
+        for i, ticker in enumerate(self.tickers):
+            self.id2ts[i] = ticker
 
     def __len__(self):
         return self.data_length
@@ -67,7 +70,8 @@ class YahooFinanceETL(Dataset):
 
     def __getitem__(self, index) -> T_co:
         """
-        Returns two tensors [u_embedding, v_embedding]. U is a numpy array of [1, initial_embedding_size],
+        Returns two tensors [u_embedding, v_embedding].
+        U is a numpy array of [1, initial_embedding_size],
         V is a numpy array of [N, initial_embedding size], where N is usually neighborhood_size * 2
         :param index:
         :return:
