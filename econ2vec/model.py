@@ -35,5 +35,5 @@ class SkipGramContinuousModel(nn.Module):
         with open(file_name, 'w') as f:
             f.write(f'{len(id2ts)} {self.emb_dimension}\n')
             for id, ts in id2ts.items():
-                e = ' '.join(map(lambda x: str(x), embedding[:id]))
+                e = ' '.join(map(lambda x: str(x), embedding[:, id]))
                 f.write(f'{ts} {e}\n')
