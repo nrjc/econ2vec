@@ -1,4 +1,3 @@
-SkipGramContinuousModel.emb_size = 20
 SkipGramContinuousModel.emb_dimension = 3
 Word2VecTrainer.iterations = 1000
 Word2VecTrainer.batch_size = 16

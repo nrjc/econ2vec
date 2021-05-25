@@ -34,7 +34,7 @@ def get_ts(ticker_df):
 @dataclass
 class YahooFinanceETL(Dataset):
     tickers: List[str] = ('^GSPC', '^STI', '^HSI', '^FTSE', '^IXIC', '^TNX', 'GC=F', 'KODK', 'TSLA', 'MSFT', 'FB',
-                          'AMZN', 'AAPL', 'GOOG', 'NFLX', 'JPM', 'BAC', 'BA', 'MA', 'GBPUSD=X')
+                          'AMZN', 'AAPL', 'GOOG', 'NFLX', 'JPM', 'BAC', 'BA', 'MA', 'GBPUSD=X', 'GOOGL')
     start: str = DEFAULT_START
     end: str = DEFAULT_END
     neighborhood_size: int = 2
@@ -57,6 +57,9 @@ class YahooFinanceETL(Dataset):
 
     def __len__(self):
         return self.data_length
+
+    def get_emb_size(self):
+        return self.initial_embedding_size
 
     def derive_relevant_indices(self, idx) -> List[int]:
         unfiltered_range = range(idx - self.neighborhood_size, idx + self.neighborhood_size + 1)
@@ -93,7 +96,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--tickers", help="Enter a list of Yahoo Finance security tickers", nargs="+", type=str,
                         default=['^GSPC', '^STI', '^HSI', '^FTSE', '^IXIC', '^TNX', 'GC=F', 'KODK', 'TSLA', 'MSFT',
-                                 'FB', 'AMZN', 'AAPL', 'GOOG', 'NFLX', 'JPM', 'BAC', 'BA', 'MA', 'GBPUSD=X'])
+                                 'FB', 'AMZN', 'AAPL', 'GOOG', 'NFLX', 'JPM', 'BAC', 'BA', 'MA', 'GBPUSD=X', 'GOOGL'])
     parser.add_argument("--start", help="Start date of format YYY-MM-DD", type=str, default=DEFAULT_START)
     parser.add_argument("--end", help="End date of format YYY-MM-DD", type=str, default=DEFAULT_END)
     args = parser.parse_args()

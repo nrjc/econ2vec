@@ -29,7 +29,7 @@ class Word2VecTrainer:
         self.dataset = YahooFinanceETL()
         self.dataloader = DataLoader(self.dataset, batch_size=self.batch_size,
                                      shuffle=False, num_workers=0, collate_fn=self.dataset.collate)
-        self.skip_gram_model = SkipGramContinuousModel()
+        self.skip_gram_model = SkipGramContinuousModel(emb_size=self.dataset.get_emb_size())
         self.device = torch.device("cuda" if self.use_cuda else "cpu")
         if self.use_cuda:
             self.skip_gram_model.cuda()
