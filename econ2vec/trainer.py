@@ -13,7 +13,7 @@ from econ2vec.model import SkipGramContinuousModel
 
 @gin.configurable
 @dataclass
-class Word2VecTrainer:
+class Econ2VecTrainer:
     batch_size: int
     iterations: int
     initial_lr: float = 1e-3
@@ -23,7 +23,7 @@ class Word2VecTrainer:
     dataset: YahooFinanceETL = None
     skip_gram_model: SkipGramContinuousModel = None
     dataloader: DataLoader = None
-    output_filename: str = "out.vec"
+    embedding_filename: str = "out.vec"
 
     def __post_init__(self):
         self.dataset = YahooFinanceETL()
@@ -57,4 +57,5 @@ class Word2VecTrainer:
                     if i > 0 and i % 500 == 0:
                         print(" Loss: " + str(running_loss))
 
-        self.skip_gram_model.save_embedding(self.dataset.id2ts, self.output_filename)
+        self.skip_gram_model.set_id2ts(self.dataset.id2ts)
+        self.skip_gram_model.save_embedding(self.embedding_filename)

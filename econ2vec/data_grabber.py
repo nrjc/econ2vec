@@ -11,8 +11,8 @@ import pandas as pd
 from torch.utils.data import Dataset
 from torch.utils.data.dataset import T_co
 
-DEFAULT_START = '2020-01-01'
-DEFAULT_END = '2020-03-31'
+DEFAULT_START = '2016-01-01'
+DEFAULT_END = '2021-04-30'
 
 def download(ticker, start_date=DEFAULT_START, end_date=DEFAULT_END):
     ticker_df = yf.download(ticker,
@@ -52,8 +52,10 @@ class YahooFinanceETL(Dataset):
         self.initial_embedding_size = len(self.tickers)
         self.data_length = len(df_final)
         self.id2ts = dict()
+        self.ts2id = dict()
         for i, ticker in enumerate(self.tickers):
             self.id2ts[i] = ticker
+            self.ts2id[ticker] = i
 
     def __len__(self):
         return self.data_length

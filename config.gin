@@ -1,4 +1,5 @@
 SkipGramContinuousModel.emb_dimension = 3
-Word2VecTrainer.iterations = 1000
-Word2VecTrainer.batch_size = 16
-Word2VecTrainer.output_filename = "out.vec"
+Econ2VecTrainer.iterations = 1000
+Econ2VecTrainer.batch_size = 16
+Econ2VecTrainer.embedding_filename = "out.vec"
+Econ2VecInferencer.embedding_filename = "out.vec"
