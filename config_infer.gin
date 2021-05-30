@@ -1,0 +1,2 @@
+SkipGramContinuousModel.emb_dimension = 3
+Econ2VecInferencer.embedding_filename = "out.vec"
