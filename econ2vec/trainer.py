@@ -13,7 +13,7 @@ from econ2vec.model import SkipGramContinuousModel
 
 @gin.configurable
 @dataclass
-class Word2VecTrainer:
+class Econ2VecTrainer:
     batch_size: int
     iterations: int
     initial_lr: float = 1e-3
@@ -21,23 +21,23 @@ class Word2VecTrainer:
     use_cuda: bool = torch.cuda.is_available()
     device: Any = None
     dataset: YahooFinanceETL = None
-    skip_gram_model: SkipGramContinuousModel = None
+    model: SkipGramContinuousModel = None
     dataloader: DataLoader = None
-    output_filename: str = "out.vec"
+    embedding_filename: str = "out.vec"
 
     def __post_init__(self):
         self.dataset = YahooFinanceETL()
         self.dataloader = DataLoader(self.dataset, batch_size=self.batch_size,
                                      shuffle=False, num_workers=0, collate_fn=self.dataset.collate)
-        self.skip_gram_model = SkipGramContinuousModel(emb_size=self.dataset.get_emb_size())
+        self.model = SkipGramContinuousModel(emb_size=self.dataset.get_emb_size())
         self.device = torch.device("cuda" if self.use_cuda else "cpu")
         if self.use_cuda:
-            self.skip_gram_model.cuda()
+            self.model.cuda()
 
     def train(self):
         for iteration in range(self.iterations):
             print("Iteration: " + str(iteration + 1))
-            optimizer = optim.Adam(self.skip_gram_model.parameters(), lr=self.initial_lr)
+            optimizer = optim.Adam(self.model.parameters(), lr=self.initial_lr)
             scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, len(self.dataloader))
 
             running_loss = 0.0
@@ -49,7 +49,7 @@ class Word2VecTrainer:
 
                     scheduler.step()
                     optimizer.zero_grad()
-                    loss = self.skip_gram_model.forward(pos_u, neg_v)
+                    loss = self.model.forward(pos_u, neg_v)
                     loss.backward()
                     optimizer.step()
 
@@ -57,4 +57,5 @@ class Word2VecTrainer:
                     if i > 0 and i % 500 == 0:
                         print(" Loss: " + str(running_loss))
 
-        self.skip_gram_model.save_embedding(self.dataset.id2ts, self.output_filename)
+        self.model.set_id2ts(self.dataset.id2ts)
+        self.model.save_embedding(self.embedding_filename)
