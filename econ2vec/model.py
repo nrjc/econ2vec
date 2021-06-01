@@ -2,7 +2,6 @@ import gin
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from torch.nn import init
 
 """
@@ -10,18 +9,21 @@ from torch.nn import init
     v_embedding: Embedding for neighbor vectors.
 """
 
+
 @gin.configurable
 class SkipGramContinuousModel(nn.Module):
-    def __init__(self, emb_size, emb_dimension):
+    def __init__(self, emb_size, emb_dimension, neighbor_dim):
         super(SkipGramContinuousModel, self).__init__()
         self.emb_size = emb_size
         self.emb_dimension = emb_dimension
         self.u_embeddings = nn.Linear(emb_size, emb_dimension)
         self.v_embeddings = nn.Linear(emb_size, emb_dimension)
+        self.v_compress_embed = nn.Conv1d(neighbor_dim * 2, 1, 1)
 
         initrange = 1.0 / self.emb_dimension
         init.uniform_(self.u_embeddings.weight.data, -initrange, initrange)
         init.constant_(self.v_embeddings.weight.data, 0)
+        init.normal_(self.v_compress_embed.weight.data)
 
         self.ts2id = dict()
         self.id2ts = dict()
@@ -29,10 +31,11 @@ class SkipGramContinuousModel(nn.Module):
     def forward(self, pos_u, pos_v):
         emb_u = self.u_embeddings(pos_u)
         emb_v = self.v_embeddings(pos_v)
-        score = torch.sum(torch.mul(emb_u, emb_v), dim=1)
-        score = torch.clamp(score, max=10, min=-10)
-        score = -F.logsigmoid(score)
-        return torch.mean(score)
+        emb_v_comp = self.v_compress_embed(emb_v)
+        diff = emb_v_comp - emb_u
+        reshaped_diff = torch.reshape(diff, (-1,))
+        score = torch.linalg.norm(reshaped_diff)
+        return score
 
     def set_id2ts(self, id2ts):
         self.id2ts = id2ts

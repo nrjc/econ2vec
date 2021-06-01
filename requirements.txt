@@ -5,3 +5,4 @@ setuptools~=46.0.0
 yfinance~=0.1.55
 gin-config~=0.4.0
 pandas~=1.2.2
+torchviz~=0.0.2
