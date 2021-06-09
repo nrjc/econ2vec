@@ -56,6 +56,7 @@ class Econ2VecTrainer:
                     running_loss = running_loss * 0.9 + loss.item() * 0.1
                     if i > 0 and i % 500 == 0:
                         print(" Loss: " + str(running_loss))
+            print(running_loss)
 
         self.model.set_id2ts(self.dataset.id2ts)
         self.model.save_embedding(self.embedding_filename)

@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.nn import init
+import torch.nn.functional as f
 
 """
     u_embedding: Embedding for center vector.
@@ -22,9 +23,8 @@ class SkipGramContinuousModel(nn.Module):
 
         initrange = 1.0 / self.emb_dimension
         init.uniform_(self.u_embeddings.weight.data, -initrange, initrange)
-        init.constant_(self.v_embeddings.weight.data, 0)
-        init.normal_(self.v_compress_embed.weight.data)
-
+        init.uniform_(self.v_embeddings.bias.data, -initrange, initrange)
+        init.uniform_(self.v_compress_embed.weight.data, -initrange, initrange)
         self.ts2id = dict()
         self.id2ts = dict()
 
@@ -32,10 +32,8 @@ class SkipGramContinuousModel(nn.Module):
         emb_u = self.u_embeddings(pos_u)
         emb_v = self.v_embeddings(pos_v)
         emb_v_comp = self.v_compress_embed(emb_v)
-        diff = emb_v_comp - emb_u
-        reshaped_diff = torch.reshape(diff, (-1,))
-        score = torch.linalg.norm(reshaped_diff)
-        return score
+        raw_mult = torch.sum(torch.mul(f.normalize(emb_u, p=2, dim=2), f.normalize(emb_v_comp, p=2, dim=2)), dim=[1, 2])
+        return torch.norm(1 - raw_mult, p=2)
 
     def set_id2ts(self, id2ts):
         self.id2ts = id2ts
