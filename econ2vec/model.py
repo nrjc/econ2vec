@@ -14,26 +14,39 @@ import torch.nn.functional as f
 @gin.configurable
 class SkipGramContinuousModel(nn.Module):
     def __init__(self, emb_size, emb_dimension, neighbor_dim):
-        super(SkipGramContinuousModel, self).__init__()
-        self.emb_size = emb_size
+        super().__init__()
         self.emb_dimension = emb_dimension
+        self.emb_size = emb_size
+        self.neighbor_dim = neighbor_dim
         self.u_embeddings = nn.Linear(emb_size, emb_dimension)
-        self.v_embeddings = nn.Linear(emb_size, emb_dimension)
-        self.v_compress_embed = nn.Conv1d(neighbor_dim * 2, 1, 1)
-
+        self.u_compress_embed = nn.Conv1d(in_channels=1,
+                                          out_channels=2 * neighbor_dim,
+                                          groups=1, kernel_size=(1,))
+        self.v_embeddings = nn.Linear(emb_dimension, emb_size)
         initrange = 1.0 / self.emb_dimension
         init.uniform_(self.u_embeddings.weight.data, -initrange, initrange)
         init.uniform_(self.v_embeddings.bias.data, -initrange, initrange)
-        init.uniform_(self.v_compress_embed.weight.data, -initrange, initrange)
+        init.uniform_(self.u_compress_embed.weight.data, -initrange, initrange)
         self.ts2id = dict()
         self.id2ts = dict()
 
     def forward(self, pos_u, pos_v):
-        emb_u = self.u_embeddings(pos_u)
-        emb_v = self.v_embeddings(pos_v)
-        emb_v_comp = self.v_compress_embed(emb_v)
-        raw_mult = torch.sum(torch.mul(f.normalize(emb_u, p=2, dim=2), f.normalize(emb_v_comp, p=2, dim=2)), dim=[1, 2])
-        return torch.norm(1 - raw_mult, p=2)
+        """
+        pos_u: *, 1, E
+        pos_v: *, N, E
+        *, 1, E -> *, 1, C -> *, N, E
+        """
+        # *, 1, E -> *, 1, C
+        b1 = self.u_embeddings(pos_u)
+        # *, 1, C -> *, N, C
+        b2 = self.u_compress_embed(b1)
+        # *, N, C -> *, N, E
+        b3 = self.v_embeddings(b2)
+        # L2 Norm Difference
+        return torch.norm(b3 - pos_v, p=2)
+
+    def compute_embedding(self, pos_u):
+        return self.u_embeddings(pos_u)
 
     def set_id2ts(self, id2ts):
         self.id2ts = id2ts
