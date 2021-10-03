@@ -9,7 +9,6 @@ import torch
 import yfinance as yf
 import pandas as pd
 from torch.utils.data import Dataset
-from torch.utils.data.dataset import T_co
 
 DEFAULT_START = '2016-01-01'
 DEFAULT_END = '2021-04-30'
@@ -75,7 +74,7 @@ class YahooFinanceETL(Dataset):
 
         return list(map(mirror, filter(lambda x: x != idx, unfiltered_range)))
 
-    def __getitem__(self, index) -> T_co:
+    def __getitem__(self, index):
         """
         Returns two tensors [u_embedding, v_embedding].
         U is a numpy array of [1, initial_embedding_size],

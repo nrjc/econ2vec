@@ -47,11 +47,11 @@ class Econ2VecTrainer:
                     pos_u = sample_batched[0].to(self.device)
                     neg_v = sample_batched[1].to(self.device)
 
+                    optimizer.step()
                     scheduler.step()
                     optimizer.zero_grad()
                     loss = self.model.forward(pos_u, neg_v)
                     loss.backward()
-                    optimizer.step()
 
                     running_loss = running_loss * 0.9 + loss.item() * 0.1
                     if i > 0 and i % 500 == 0:
