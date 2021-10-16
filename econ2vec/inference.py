@@ -24,4 +24,5 @@ class Econ2VecInferencer:
     def cos_sim(self, ticker1, ticker2):
         emb1, emb2 = self.ticker2emb(ticker1), self.ticker2emb(ticker2)
         cos = nn.CosineSimilarity(dim=0, eps=1e-8)
-        return cos(emb1, emb2)
+        res = cos(emb1, emb2).item()
+        return round(res, 3)

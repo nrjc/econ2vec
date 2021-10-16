@@ -1,5 +1,5 @@
 SkipGramContinuousModel.emb_dimension = 3
-Econ2VecTrainer.iterations = 1000
+Econ2VecTrainer.iterations = 500
 Econ2VecTrainer.batch_size = 16
 Econ2VecTrainer.embedding_filename = "out.vec"
 NEIGHBORHOOD_SIZE = 2

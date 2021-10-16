@@ -36,7 +36,7 @@ class Econ2VecTrainer:
 
     def train(self):
         for iteration in range(self.iterations):
-            print("Iteration: " + str(iteration + 1))
+            print(f"Iteration: {(iteration + 1)}")
             optimizer = optim.Adam(self.model.parameters(), lr=self.initial_lr)
             scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, len(self.dataloader))
 
@@ -55,7 +55,7 @@ class Econ2VecTrainer:
 
                     running_loss = running_loss * 0.9 + loss.item() * 0.1
                     if i > 0 and i % 500 == 0:
-                        print(" Loss: " + str(running_loss))
+                        print(f"Loss: {str(running_loss)}")
             print(running_loss)
 
         self.model.set_id2ts(self.dataset.id2ts)

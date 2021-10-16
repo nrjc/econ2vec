@@ -11,7 +11,7 @@ import pandas as pd
 from torch.utils.data import Dataset
 
 DEFAULT_START = '2016-01-01'
-DEFAULT_END = '2021-04-30'
+DEFAULT_END = '2021-09-30'
 
 def download(ticker, start_date=DEFAULT_START, end_date=DEFAULT_END):
     ticker_df = yf.download(ticker,
@@ -32,8 +32,8 @@ def get_ts(ticker_df):
 @gin.configurable
 @dataclass
 class YahooFinanceETL(Dataset):
-    tickers: List[str] = ('^GSPC', '^STI', '^HSI', '^FTSE', '^IXIC', '^TNX', 'GC=F', 'KODK', 'TSLA', 'MSFT', 'FB',
-                          'AMZN', 'AAPL', 'GOOG', 'NFLX', 'JPM', 'BAC', 'BA', 'MA', 'GBPUSD=X', 'GOOGL')
+    tickers: List[str] = ('^GSPC', '^STI', '^HSI', '^FTSE', '^IXIC', '^TNX', 'GC=F', 'KODK', 'TSLA', 'MSFT', 'AMZN',
+                          'FB', 'AAPL', 'GOOG', 'GOOGL', 'NFLX', 'JPM', 'BAC', 'BA', 'MA', 'GBPUSD=X', 'GBPSGD=X')
     start: str = DEFAULT_START
     end: str = DEFAULT_END
     neighborhood_size: int = 2
@@ -96,8 +96,8 @@ class YahooFinanceETL(Dataset):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--tickers", help="Enter a list of Yahoo Finance security tickers", nargs="+", type=str,
-                        default=['^GSPC', '^STI', '^HSI', '^FTSE', '^IXIC', '^TNX', 'GC=F', 'KODK', 'TSLA', 'MSFT',
-                                 'FB', 'AMZN', 'AAPL', 'GOOG', 'NFLX', 'JPM', 'BAC', 'BA', 'MA', 'GBPUSD=X', 'GOOGL'])
+                        default=['^GSPC', '^STI', '^HSI', '^FTSE', '^IXIC', '^TNX', 'GC=F', 'KODK', 'TSLA', 'MSFT', 'AMZN',
+                                 'FB', 'AAPL', 'GOOG', 'GOOGL', 'NFLX', 'JPM', 'BAC', 'BA', 'MA', 'GBPUSD=X', 'GBPSGD=X'])
     parser.add_argument("--start", help="Start date of format YYY-MM-DD", type=str, default=DEFAULT_START)
     parser.add_argument("--end", help="End date of format YYY-MM-DD", type=str, default=DEFAULT_END)
     args = parser.parse_args()
