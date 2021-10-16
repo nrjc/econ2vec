@@ -24,6 +24,7 @@ class Econ2VecTrainer:
     model: SkipGramContinuousModel = None
     dataloader: DataLoader = None
     embedding_filename: str = "out.vec"
+    weight_decay: float = 0
 
     def __post_init__(self):
         self.dataset = YahooFinanceETL()
@@ -37,7 +38,7 @@ class Econ2VecTrainer:
     def train(self):
         for iteration in range(self.iterations):
             print(f"Iteration: {(iteration + 1)}")
-            optimizer = optim.Adam(self.model.parameters(), lr=self.initial_lr)
+            optimizer = optim.Adam(self.model.parameters(), lr=self.initial_lr, weight_decay=self.weight_decay)
             scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, len(self.dataloader))
 
             running_loss = 0.0

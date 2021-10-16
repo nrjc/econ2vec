@@ -2,6 +2,7 @@ SkipGramContinuousModel.emb_dimension = 3
 Econ2VecTrainer.iterations = 500
 Econ2VecTrainer.batch_size = 16
 Econ2VecTrainer.embedding_filename = "out.vec"
+Econ2VecTrainer.weight_decay = 1.8e-3
 NEIGHBORHOOD_SIZE = 2
 SkipGramContinuousModel.neighbor_dim = %NEIGHBORHOOD_SIZE
 YahooFinanceETL.neighborhood_size = %NEIGHBORHOOD_SIZE
