@@ -39,7 +39,7 @@ class Econ2VecTrainer:
         for iteration in range(self.iterations):
             print(f"Iteration: {(iteration + 1)}")
             optimizer = optim.Adam(self.model.parameters(), lr=self.initial_lr, weight_decay=self.weight_decay)
-            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, len(self.dataloader))
+            scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
 
             running_loss = 0.0
 
