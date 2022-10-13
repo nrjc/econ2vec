@@ -9,7 +9,7 @@ from word2vec.model import SkipGramModel
 
 class Word2VecTrainer:
     def __init__(self, input_file, output_file, emb_dimension=100, batch_size=32, window_size=5, iterations=3,
-                 initial_lr=0.001, min_count=12):
+                 initial_lr=0.001, min_count=12, weight_decay=0):
 
         self.data = DataReader(input_file, min_count)
         dataset = Word2vecDataset(self.data, window_size)
@@ -23,7 +23,7 @@ class Word2VecTrainer:
         self.iterations = iterations
         self.initial_lr = initial_lr
         self.skip_gram_model = SkipGramModel(self.emb_size, self.emb_dimension)
-
+        self.weight_decay = weight_decay
         self.use_cuda = torch.cuda.is_available()
         self.device = torch.device("cuda" if self.use_cuda else "cpu")
         if self.use_cuda:
@@ -34,7 +34,8 @@ class Word2VecTrainer:
         for iteration in range(self.iterations):
 
             print("\n\n\nIteration: " + str(iteration + 1))
-            optimizer = optim.SparseAdam(self.skip_gram_model.parameters(), lr=self.initial_lr)
+            optimizer = optim.Adam(self.skip_gram_model.parameters(), lr=self.initial_lr,
+                                   weight_decay=self.weight_decay)
             scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, len(self.dataloader))
 
             running_loss = 0.0

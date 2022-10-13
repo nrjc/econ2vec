@@ -11,7 +11,7 @@ import pandas as pd
 from torch.utils.data import Dataset
 
 DEFAULT_START = '2016-01-01'
-DEFAULT_END = '2021-09-30'
+DEFAULT_END = '2022-10-01'
 
 def download(ticker, start_date=DEFAULT_START, end_date=DEFAULT_END):
     ticker_df = yf.download(ticker,
@@ -33,7 +33,7 @@ def get_ts(ticker_df):
 @dataclass
 class YahooFinanceETL(Dataset):
     tickers: List[str] = ('^GSPC', '^STI', '^HSI', '^FTSE', '^IXIC', '^TNX', 'GC=F', 'KODK', 'TSLA', 'MSFT', 'AMZN',
-                          'FB', 'AAPL', 'GOOG', 'GOOGL', 'NFLX', 'JPM', 'BAC', 'BA', 'MA', 'GBPUSD=X', 'GBPSGD=X')
+                          'META', 'AAPL', 'GOOG', 'GOOGL', 'NFLX', 'JPM', 'BAC', 'BA', 'MA', 'GBPUSD=X', 'GBPSGD=X')
     start: str = DEFAULT_START
     end: str = DEFAULT_END
     neighborhood_size: int = 2
@@ -45,7 +45,7 @@ class YahooFinanceETL(Dataset):
         stock_dfs = [download(ticker, start_date=self.start, end_date=self.end) for ticker in self.tickers]
         close_prices = [get_ts(df)[2] for df in stock_dfs]
         # Changing names of columns
-        close_prices = [df.rename(self.tickers[i]) for i, df in enumerate(close_prices)]
+        close_prices = [df.rename(self.tickers[i]).tz_localize(None) for i, df in enumerate(close_prices)]
         df_final = reduce(lambda left, right: pd.merge(left, right, left_index=True, right_index=True), close_prices)
         self.dataset = df_final
         self.initial_embedding_size = len(self.tickers)
