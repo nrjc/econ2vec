@@ -97,7 +97,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--tickers", help="Enter a list of Yahoo Finance security tickers", nargs="+", type=str,
                         default=['^GSPC', '^STI', '^HSI', '^FTSE', '^IXIC', '^TNX', 'GC=F', 'KODK', 'TSLA', 'MSFT', 'AMZN',
-                                 'FB', 'AAPL', 'GOOG', 'GOOGL', 'NFLX', 'JPM', 'BAC', 'BA', 'MA', 'GBPUSD=X', 'GBPSGD=X'])
+                                 'META', 'AAPL', 'GOOG', 'GOOGL', 'NFLX', 'JPM', 'BAC', 'BA', 'MA', 'GBPUSD=X', 'GBPSGD=X'])
     parser.add_argument("--start", help="Start date of format YYY-MM-DD", type=str, default=DEFAULT_START)
     parser.add_argument("--end", help="End date of format YYY-MM-DD", type=str, default=DEFAULT_END)
     args = parser.parse_args()
