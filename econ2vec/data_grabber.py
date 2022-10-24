@@ -1,5 +1,4 @@
 import argparse
-import math
 from dataclasses import dataclass, field
 from functools import reduce
 from typing import List, Dict
@@ -13,20 +12,17 @@ from torch.utils.data import Dataset
 DEFAULT_START = '2016-01-01'
 DEFAULT_END = '2022-10-01'
 
-def download(ticker, start_date=DEFAULT_START, end_date=DEFAULT_END):
-    ticker_df = yf.download(ticker,
-                            start=start_date,
-                            end=end_date,
-                            auto_adjust=True,
-                            progress=False)
-    return ticker_df
+
+def dropna(df):
+    return df.dropna(axis=0, how='all')
 
 
-def get_ts(ticker_df):
-    high = ticker_df['High']
-    low = ticker_df['Low']
-    close = ticker_df['Close']
-    return high, low, close
+def copy_df(df):
+    return df.copy()
+
+
+def pct_change(df, periods=1):
+    return df.pct_change(periods=periods)
 
 
 @gin.configurable
@@ -42,12 +38,17 @@ class YahooFinanceETL(Dataset):
     data_length: int = field(init=False)
 
     def __post_init__(self):
-        stock_dfs = [download(ticker, start_date=self.start, end_date=self.end) for ticker in self.tickers]
-        close_prices = [get_ts(df)[2] for df in stock_dfs]
+        stock_dfs = [self.download(ticker, start_date=self.start, end_date=self.end) for ticker in self.tickers]
+        close_prices = [self.get_ts(df)[2] for df in stock_dfs]
         # Changing names of columns
         close_prices = [df.rename(self.tickers[i]).tz_localize(None) for i, df in enumerate(close_prices)]
         df_final = reduce(lambda left, right: pd.merge(left, right, left_index=True, right_index=True), close_prices)
+        df_final = (df_final.
+                    pipe(copy_df).
+                    pipe(pct_change).
+                    pipe(dropna))
         self.dataset = df_final
+
         self.initial_embedding_size = len(self.tickers)
         self.data_length = len(df_final)
         self.id2ts = dict()
@@ -58,6 +59,22 @@ class YahooFinanceETL(Dataset):
 
     def __len__(self):
         return self.data_length
+
+    @staticmethod
+    def download(ticker, start_date=DEFAULT_START, end_date=DEFAULT_END):
+        ticker_df = yf.download(ticker,
+                                start=start_date,
+                                end=end_date,
+                                auto_adjust=True,
+                                progress=False)
+        return ticker_df
+
+    @staticmethod
+    def get_ts(ticker_df):
+        high = ticker_df['High']
+        low = ticker_df['Low']
+        close = ticker_df['Close']
+        return high, low, close
 
     def get_emb_size(self):
         return self.initial_embedding_size
@@ -79,8 +96,8 @@ class YahooFinanceETL(Dataset):
         Returns two tensors [u_embedding, v_embedding].
         U is a numpy array of [1, initial_embedding_size],
         V is a numpy array of [N, initial_embedding size], where N is usually neighborhood_size * 2
-        :param index:
-        :return:
+        :param: index:
+        :return: two tensors [u_embedding, v_embedding]
         """
         u_embedding = self.dataset.iloc[index, :].to_numpy().reshape(1, -1)
         v_embedding = self.dataset.iloc[self.derive_relevant_indices(index), :].to_numpy()
